@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "AlfredIA",
+    "slug": "alfredia",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "alfredia",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.alfredia.app"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

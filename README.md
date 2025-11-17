@@ -1,36 +1,51 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+````markdown
+# AlfredIA (Expo / React Native)
 
-## Getting Started
+Aplicación móvil construida con [Expo](https://expo.dev) y React Native que replica el tablero inteligente AlfredIA con navegación por pestañas, agenda, alarmas, recomendaciones y centro de notificaciones.
 
-First, run the development server:
+## Requisitos
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18+ y npm
+- [Expo Go](https://expo.dev/client) en tu dispositivo móvil o un emulador Android/iOS configurado
+
+## Instalación
+
+```powershell
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Comando | Descripción |
+| --- | --- |
+| `npm start` | Inicia el servidor de desarrollo Expo (presiona `a` para Android, `i` para iOS, `w` para web). |
+| `npm run android` | Compila y ejecuta la app en un dispositivo/emulador Android. |
+| `npm run ios` | Compila y ejecuta la app en un simulador iOS (macOS). |
+| `npm run web` | Ejecuta la versión web usando Expo. |
+| `npm run lint` | Analiza el código con ESLint (configuración oficial de Expo). |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Estructura
 
-## Learn More
+```
+.
+├── App.tsx                 # Punto de entrada Expo
+├── app.json                # Configuración del proyecto Expo
+├── src/
+│   ├── navigation/         # Stack y bottom tabs (RootNavigator)
+│   ├── screens/            # Pantallas Inicio, Agenda, Alarmas, Alfred, Mapa, Notificaciones, Configuración
+│   └── theme/              # Tokens de color y espaciado
+└── README.md
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Notas
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- El diseño utiliza componentes nativos (ScrollView, Pressable, Switch, etc.) y una capa de tema simple (`COLORS`, `SPACING`).
+- Las pantallas de Agenda, Alarmas, Alfred y Mapa se acceden desde el tab "Principal" mediante un stack interno.
+- Puedes personalizar iconos y activos agregando recursos dentro de `assets/` y actualizando `app.json`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Próximos pasos sugeridos
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Sustituir los datos mock por servicios reales (calendario, alarmas, GPS, etc.).
+- Conectar un backend o storage local para persistir configuraciones y estado de notificaciones.
+````

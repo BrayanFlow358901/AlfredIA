@@ -1,28 +1,38 @@
 {
-  "name": "my-app",
-  "version": "0.1.0",
+  "name": "alfredia",
+  "version": "1.0.0",
   "private": true,
+  "main": "expo/AppEntry.js",
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start",
-    "lint": "eslint"
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {
-    "date-fns": "^4.1.0",
-    "next": "15.5.2",
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "@expo/metro-runtime": "~3.2.3",
+    "@expo/vector-icons": "^14.0.0",
+    "@react-navigation/bottom-tabs": "^6.6.1",
+    "@react-navigation/native": "^6.1.10",
+    "@react-navigation/native-stack": "^6.9.17",
+    "expo": "~51.0.13",
+    "expo-status-bar": "~1.12.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-native": "0.74.3",
+    "react-native-gesture-handler": "~2.16.1",
+    "react-native-reanimated": "~3.10.1",
+    "react-native-safe-area-context": "4.10.1",
+    "react-native-screens": "~3.31.1",
+    "react-native-web": "~0.19.10"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "15.5.2",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "@babel/core": "^7.24.5",
+    "@types/react": "~18.2.38",
+    "@types/react-native": "~0.73.0",
+    "eslint": "^9.9.0",
+    "eslint-config-expo": "^10.0.0",
+    "typescript": "^5.4.5"
   }
 }
