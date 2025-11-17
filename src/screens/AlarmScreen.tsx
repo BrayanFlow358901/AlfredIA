@@ -13,6 +13,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import { COLORS, SPACING } from "../theme";
 import { HomeStackParamList } from "../navigation/types";
+import { usePersistentState } from "../lib/usePersistentState";
 
 const initialAlarms = [
   {
@@ -37,9 +38,11 @@ type AlarmType = (typeof initialAlarms)[number];
 
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
 
+const ALARM_STORAGE_KEY = "@alfredia:alarms";
+
 export default function AlarmScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [alarms, setAlarms] = useState(initialAlarms);
+  const [alarms, setAlarms] = usePersistentState<AlarmType[]>(ALARM_STORAGE_KEY, initialAlarms);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<AlarmType>({
@@ -71,6 +74,7 @@ export default function AlarmScreen() {
       setAlarms((prev) => [...prev, { ...parsed, id: Date.now() }]);
     }
     setModalVisible(false);
+    setEditingId(null);
   };
 
   const toggleAlarm = (id: number) => {

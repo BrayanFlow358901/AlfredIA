@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { HomeStackParamList } from "../navigation/types";
 import { COLORS, SPACING } from "../theme";
+import { usePersistentState } from "../lib/usePersistentState";
 
 const initialEvents = [
   {
@@ -38,10 +39,13 @@ type EventType = (typeof initialEvents)[number];
 
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
 
+const EVENTS_STORAGE_KEY = "@alfredia:events";
+const REMINDERS_STORAGE_KEY = "@alfredia:event-reminders";
+
 export default function AgendaScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [events, setEvents] = useState<EventType[]>(initialEvents);
-  const [reminders, setReminders] = useState<number[]>([1]);
+  const [events, setEvents] = usePersistentState<EventType[]>(EVENTS_STORAGE_KEY, initialEvents);
+  const [reminders, setReminders] = usePersistentState<number[]>(REMINDERS_STORAGE_KEY, [1]);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<EventType>({
@@ -79,6 +83,7 @@ export default function AgendaScreen() {
       setEvents((prev) => [...prev, { ...form, id: Date.now() }]);
     }
     setModalVisible(false);
+    setEditingId(null);
   };
 
   const handleDelete = (id: number) => {
