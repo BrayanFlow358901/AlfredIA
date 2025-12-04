@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
+
 import HomeScreen from "../screens/HomeScreen";
 import AgendaScreen from "../screens/AgendaScreen";
 import AlarmScreen from "../screens/AlarmScreen";
@@ -8,11 +9,13 @@ import AlfredScreen from "../screens/AlfredScreen";
 import MapScreen from "../screens/MapScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import ChatScreen from "../screens/ChatScreen";
 import { HomeStackParamList, RootTabParamList } from "./types";
 import { View } from "react-native";
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
+
 
 function HomeStackNavigator() {
   return (
@@ -27,6 +30,7 @@ function HomeStackNavigator() {
       <HomeStack.Screen name="Alarmas" component={AlarmScreen} />
       <HomeStack.Screen name="Alfred" component={AlfredScreen} />
       <HomeStack.Screen name="Mapa" component={MapScreen} />
+      <HomeStack.Screen name="Chat" component={ChatScreen} />
     </HomeStack.Navigator>
   );
 }
