@@ -1,7 +1,18 @@
-import expo from "eslint-config-expo/flat.js";
+import { FlatCompat } from "@eslint/eslintrc";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const config = [
-  ...expo,
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
+
+export default [
+  ...compat.config({
+    extends: ["expo"],
+  }),
   {
     ignores: ["node_modules/**", "dist/**", "android/**", "ios/**"],
     rules: {
@@ -9,5 +20,3 @@ const config = [
     },
   },
 ];
-
-export default config;

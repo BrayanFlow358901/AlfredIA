@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Keyboard, useColorScheme } from 'react-native';
 import { askGemini } from '../lib/aiClient';
-import { saveChatHistory, loadChatHistory } from '../lib/chatStorage';
+import { saveChatHistory, loadChatHistory, clearChatHistory } from '../lib/chatStorage';
 import { COLORS_LIGHT, COLORS_DARK } from '../theme';
 import { scheduleNotification } from '../lib/notificationHelper';
 import { createCalendarEvent } from '../lib/calendarHelper';
@@ -83,6 +83,11 @@ const ChatScreen: React.FC = () => {
     }
   };
 
+  const handleClear = async () => {
+    setMessages([{ sender: 'AlfredIA', text: 'Historial borrado. ¿En qué puedo ayudarte ahora?' }]);
+    await clearChatHistory();
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }] }>
       <ScrollView style={[styles.chatArea, { backgroundColor: themeColors.background }]} ref={scrollRef} accessible accessibilityLabel="Historial de chat">
@@ -114,6 +119,14 @@ const ChatScreen: React.FC = () => {
             </TouchableOpacity>
           ))}
         </View>
+        <TouchableOpacity
+          style={[styles.clearBtn, { borderColor: themeColors.border }]}
+          onPress={handleClear}
+          accessible
+          accessibilityLabel="Limpiar chat"
+        >
+          <Text style={[styles.clearText, { color: themeColors.secondary }]}>Borrar chat</Text>
+        </TouchableOpacity>
       </View>
       <View style={[styles.inputArea, { backgroundColor: themeColors.surface }] }>
         <TextInput
@@ -160,6 +173,8 @@ const styles = StyleSheet.create({
   sugerenciasList: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   sugerenciaBtn: { backgroundColor: '#e0e7ff', borderRadius: 16, paddingVertical: 6, paddingHorizontal: 12, marginRight: 6, marginBottom: 6 },
   sugerenciaText: { color: '#3730a3', fontSize: 13 },
+  clearBtn: { marginTop: 6, alignSelf: 'flex-start', paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1 },
+  clearText: { fontWeight: '600' },
 });
 
 export default ChatScreen;

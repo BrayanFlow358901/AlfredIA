@@ -2,7 +2,7 @@
 import { StatusBar } from "expo-status-bar";
 import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { GestureHandlerRootView } from "./src/lib/gesture-handler";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import RootNavigator from "./src/navigation/RootNavigator";
 import { useColorScheme } from "react-native";
 import { COLORS_LIGHT, COLORS_DARK } from "./src/theme";

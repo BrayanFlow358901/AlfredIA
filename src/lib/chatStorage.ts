@@ -21,3 +21,11 @@ export async function loadChatHistory(): Promise<{ sender: string; text: string 
   }
   return [];
 }
+
+export async function clearChatHistory() {
+  try {
+    await AsyncStorage.removeItem(CHAT_STORAGE_KEY);
+  } catch (e) {
+    // Error al limpiar
+  }
+}

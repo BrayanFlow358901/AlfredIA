@@ -11,374 +11,14 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import { COLORS, SPACING } from "../theme";
 import { HomeStackParamList } from "../navigation/types";
+import { RECOMMENDATION_POOL, Recommendation } from "../data/recommendations";
+import { formatDistance, haversineDistanceKm, useCurrentLocation } from "../lib/location";
 
-const recommendationPool = [
-  {
-    id: 1,
-    title: "Café Luna",
-    status: "Abierto",
-    desc: "Café artesanal con ambiente acogedor y wifi gratis",
-    rating: 4.5,
-    distance: 250,
-    price: "$$",
-    tags: ["Café", "Wifi"],
-    category: "Comida",
-    time: "07:00 - 22:00",
-  },
-  {
-    id: 2,
-    title: "Concierto Jazz en Vivo",
-    status: "Esta noche",
-    desc: "Noche de jazz con músicos locales",
-    rating: 4.8,
-    distance: 800,
-    price: "$$$",
-    tags: ["Música", "Nocturno"],
-    category: "Eventos",
-    time: "20:00 - 23:00",
-  },
-  {
-    id: 3,
-    title: "Restaurante Terra",
-    status: "Abierto",
-    desc: "Cocina mediterránea con ingredientes orgánicos",
-    rating: 4.3,
-    distance: 340,
-    price: "$$$",
-    tags: ["Comida", "Orgánico"],
-    category: "Comida",
-    time: "12:00 - 23:00",
-  },
-  {
-    id: 4,
-    title: "Tour Histórico Centro",
-    status: "Próximo",
-    desc: "Recorrido guiado por los edificios icónicos del centro",
-    rating: 4.7,
-    distance: 1200,
-    price: "$$",
-    tags: ["Historia", "Guiado"],
-    category: "Actividades",
-    time: "16:00 - 18:00",
-  },
-  {
-    id: 5,
-    title: "Gimnasio 24/7 Pulse",
-    status: "Abierto",
-    desc: "Entrena con instructores certificados todo el día",
-    rating: 4.2,
-    distance: 600,
-    price: "$$",
-    tags: ["Fitness", "24/7"],
-    category: "Actividades",
-    time: "00:00 - 23:59",
-  },
-  {
-    id: 6,
-    title: "Mercado Orgánico Verde",
-    status: "Fin de semana",
-    desc: "Productores locales con degustaciones frescas",
-    rating: 4.6,
-    distance: 1500,
-    price: "$$",
-    tags: ["Orgánico", "Local"],
-    category: "Eventos",
-    time: "09:00 - 14:00",
-  },
-  {
-    id: 7,
-    title: "Taller de Cerámica",
-    status: "Quedan cupos",
-    desc: "Aprende técnicas básicas para crear tus piezas",
-    rating: 4.9,
-    distance: 500,
-    price: "$$",
-    tags: ["Arte", "Manual"],
-    category: "Actividades",
-    time: "18:00 - 20:00",
-  },
-  {
-    id: 8,
-    title: "Brunch Botánico",
-    status: "Abierto",
-    desc: "Desayunos creativos entre plantas tropicales",
-    rating: 4.4,
-    distance: 420,
-    price: "$$",
-    tags: ["Brunch", "Vegetariano"],
-    category: "Comida",
-    time: "09:00 - 13:00",
-  },
-  {
-    id: 9,
-    title: "Ruta de Senderismo Mirador",
-    status: "Mañana",
-    desc: "Subida guiada con vistas panorámicas y snack",
-    rating: 4.8,
-    distance: 3200,
-    price: "$",
-    tags: ["Outdoor", "Guía"],
-    category: "Actividades",
-    time: "06:00 - 10:00",
-  },
-  {
-    id: 10,
-    title: "Exposición Arte Digital",
-    status: "Nuevo",
-    desc: "Instalaciones inmersivas de artistas emergentes",
-    rating: 4.5,
-    distance: 900,
-    price: "$$",
-    tags: ["Arte", "Interactivo"],
-    category: "Eventos",
-    time: "11:00 - 21:00",
-  },
-  {
-    id: 11,
-    title: "Cine al Aire Libre",
-    status: "Esta noche",
-    desc: "Películas clásicas con mantas y popcorn",
-    rating: 4.6,
-    distance: 1100,
-    price: "$",
-    tags: ["Cine", "Exterior"],
-    category: "Eventos",
-    time: "19:30 - 22:00",
-  },
-  {
-    id: 12,
-    title: "Taller Barista Express",
-    status: "Quedan 5 cupos",
-    desc: "Domina el espresso perfecto en dos horas",
-    rating: 4.9,
-    distance: 350,
-    price: "$$",
-    tags: ["Café", "Curso"],
-    category: "Actividades",
-    time: "15:00 - 17:00",
-  },
-  {
-    id: 13,
-    title: "Restaurante Fuego y Sal",
-    status: "Abierto",
-    desc: "Carnes a la parrilla y vinos de autor",
-    rating: 4.7,
-    distance: 610,
-    price: "$$$",
-    tags: ["Parrilla", "Vinos"],
-    category: "Comida",
-    time: "13:00 - 00:00",
-  },
-  {
-    id: 14,
-    title: "Food Truck Plaza",
-    status: "Abierto",
-    desc: "Rotación diaria de camiones gourmet",
-    rating: 4.3,
-    distance: 780,
-    price: "$",
-    tags: ["Street Food", "Casual"],
-    category: "Comida",
-    time: "12:00 - 23:00",
-  },
-  {
-    id: 15,
-    title: "Yoga al Amanecer",
-    status: "Reserva previa",
-    desc: "Clase al aire libre frente al lago",
-    rating: 4.8,
-    distance: 2000,
-    price: "$$",
-    tags: ["Bienestar", "Outdoor"],
-    category: "Actividades",
-    time: "05:30 - 07:00",
-  },
-  {
-    id: 16,
-    title: "Conferencia TechNow",
-    status: "Próximo",
-    desc: "Paneles sobre IA y startups latinoamericanas",
-    rating: 4.5,
-    distance: 5000,
-    price: "$$$",
-    tags: ["Tech", "Networking"],
-    category: "Eventos",
-    time: "09:00 - 18:00",
-  },
-  {
-    id: 17,
-    title: "Galería Minimal",
-    status: "Abierto",
-    desc: "Colección permanente de arte contemporáneo",
-    rating: 4.1,
-    distance: 980,
-    price: "$",
-    tags: ["Arte", "Minimal"],
-    category: "Eventos",
-    time: "10:00 - 19:00",
-  },
-  {
-    id: 18,
-    title: "Pizza Forno Napo",
-    status: "Abierto",
-    desc: "Masa madre y horno de leña napolitano",
-    rating: 4.6,
-    distance: 430,
-    price: "$$",
-    tags: ["Pizza", "Familiar"],
-    category: "Comida",
-    time: "12:00 - 00:00",
-  },
-  {
-    id: 19,
-    title: "Burger Lab 57",
-    status: "Abierto",
-    desc: "Hamburguesas experimentales con sabores únicos",
-    rating: 4.4,
-    distance: 520,
-    price: "$$",
-    tags: ["Casual", "Gourmet"],
-    category: "Comida",
-    time: "11:30 - 23:30",
-  },
-  {
-    id: 20,
-    title: "Rooftop Lounge Eclipse",
-    status: "DJ invitado",
-    desc: "Cocteles de autor con vista panorámica",
-    rating: 4.7,
-    distance: 870,
-    price: "$$$",
-    tags: ["Cocteles", "Vista"],
-    category: "Actividades",
-    time: "18:00 - 02:00",
-  },
-  {
-    id: 21,
-    title: "Festival Sabores del Mundo",
-    status: "Fin de semana",
-    desc: "30 puestos con gastronomía internacional",
-    rating: 4.9,
-    distance: 2600,
-    price: "$$",
-    tags: ["Festival", "Gastronomía"],
-    category: "Eventos",
-    time: "11:00 - 22:00",
-  },
-  {
-    id: 22,
-    title: "Clase de Mixología",
-    status: "Quedan 2 cupos",
-    desc: "Aprende a crear cocteles de temporada",
-    rating: 4.8,
-    distance: 640,
-    price: "$$",
-    tags: ["Cocteles", "Curso"],
-    category: "Actividades",
-    time: "19:00 - 21:00",
-  },
-  {
-    id: 23,
-    title: "Biblioteca Nocturna",
-    status: "Hasta medianoche",
-    desc: "Espacio silencioso con café ilimitado",
-    rating: 4.3,
-    distance: 300,
-    price: "$",
-    tags: ["Lectura", "24/7"],
-    category: "Actividades",
-    time: "08:00 - 00:00",
-  },
-  {
-    id: 24,
-    title: "Heladería Polar",
-    status: "Abierto",
-    desc: "Helados artesanales con toppings ilimitados",
-    rating: 4.2,
-    distance: 150,
-    price: "$",
-    tags: ["Postres", "Familiar"],
-    category: "Comida",
-    time: "12:00 - 23:00",
-  },
-  {
-    id: 25,
-    title: "Mercado Vintage",
-    status: "Solo sábado",
-    desc: "Ropa y vinilos con música en vivo",
-    rating: 4.4,
-    distance: 1800,
-    price: "$$",
-    tags: ["Vintage", "Retro"],
-    category: "Eventos",
-    time: "10:00 - 18:00",
-  },
-  {
-    id: 26,
-    title: "Maratón 5K Solidaria",
-    status: "Inscripciones abiertas",
-    desc: "Circuito urbano con kit deportivo incluido",
-    rating: 4.6,
-    distance: 4200,
-    price: "$$",
-    tags: ["Deporte", "Solidario"],
-    category: "Eventos",
-    time: "07:00 - 11:00",
-  },
-  {
-    id: 27,
-    title: "Club de Lectura Aurora",
-    status: "Miércoles",
-    desc: "Discusión guiada de novela latinoamericana",
-    rating: 4.5,
-    distance: 700,
-    price: "$",
-    tags: ["Lectura", "Club"],
-    category: "Actividades",
-    time: "19:30 - 21:00",
-  },
-  {
-    id: 28,
-    title: "Taller Fotografía Urbana",
-    status: "Próximo",
-    desc: "Recorrido práctico para capturar la ciudad",
-    rating: 4.7,
-    distance: 1350,
-    price: "$$",
-    tags: ["Foto", "Caminar"],
-    category: "Actividades",
-    time: "15:00 - 19:00",
-  },
-  {
-    id: 29,
-    title: "Restaurante Verde Vivo",
-    status: "Abierto",
-    desc: "Menú plant-based con ingredientes locales",
-    rating: 4.6,
-    distance: 560,
-    price: "$$",
-    tags: ["Vegano", "Fresco"],
-    category: "Comida",
-    time: "12:00 - 22:00",
-  },
-  {
-    id: 30,
-    title: "Degustación Chocolates Andinos",
-    status: "Solo hoy",
-    desc: "Tabla guiada de cacao premium y maridajes",
-    rating: 4.9,
-    distance: 480,
-    price: "$$$",
-    tags: ["Gourmet", "Cacao"],
-    category: "Eventos",
-    time: "18:00 - 20:00",
-  },
-];
-
-type Recommendation = (typeof recommendationPool)[number];
+type RecommendationWithDistance = Recommendation & { distanceKm: number | null };
 
 const RECOMMENDATION_ROTATION_SIZE = 3;
 const RECOMMENDATION_ROTATION_INTERVAL = 60_000;
+const RADIUS_OPTIONS = [1, 2, 3, 4, 5];
 
 const categories = [
   { label: "Todos", value: "all" },
@@ -400,39 +40,68 @@ export default function AlfredScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [favorites, setFavorites] = useState<number[]>([]);
   const [selected, setSelected] = useState("all");
-  const [rotationIndex, setRotationIndex] = useState(0);
+  const [radiusKm, setRadiusKm] = useState(3);
+  const [rotationTick, setRotationTick] = useState(0);
   const [agendaId, setAgendaId] = useState<number | null>(null);
-  const tip = useMemo(() => tips[Math.floor(Math.random() * tips.length)], []);
-  const filteredPool = useMemo<Recommendation[]>(
-    () => (selected === "all" ? recommendationPool : recommendationPool.filter((rec) => rec.category === selected)),
-    [selected]
+  const [tip] = useState(() => tips[Math.floor(Math.random() * tips.length)]);
+  const { location, hasPermission, isRequesting, error, refresh } = useCurrentLocation();
+
+  const locationCoords = useMemo(
+    () =>
+      location?.coords
+        ? { latitude: location.coords.latitude, longitude: location.coords.longitude }
+        : null,
+    [location]
   );
 
-  const visibleRecommendations = useMemo<Recommendation[]>(() => {
+  const locationKey = locationCoords ? `${locationCoords.latitude}-${locationCoords.longitude}` : "none";
+
+  const poolWithDistance = useMemo<RecommendationWithDistance[]>(() => {
+    return RECOMMENDATION_POOL.map((rec) => ({
+      ...rec,
+      distanceKm: locationCoords ? haversineDistanceKm(locationCoords, rec.coords) : null,
+    }));
+  }, [locationCoords]);
+
+  const chatSuggestions = useMemo<RecommendationWithDistance[]>(() => {
+    const sorted = [...poolWithDistance].sort(
+      (a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity)
+    );
+    return sorted.slice(0, 3);
+  }, [poolWithDistance]);
+
+  const filteredPool = useMemo<RecommendationWithDistance[]>(() => {
+    const byCategory =
+      selected === "all" ? poolWithDistance : poolWithDistance.filter((rec) => rec.category === selected);
+    if (!locationCoords) {
+      return byCategory;
+    }
+    return byCategory.filter((rec) => rec.distanceKm !== null && rec.distanceKm <= radiusKm);
+  }, [locationCoords, poolWithDistance, radiusKm, selected]);
+
+  const rotationResetKey = `${selected}-${radiusKm}-${locationKey}-${filteredPool.length}`;
+  const rotationBaseTick = useMemo(() => rotationTick, [rotationResetKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const rotationStartIndex = useMemo(() => {
+    if (!filteredPool.length) return 0;
+    const raw = rotationTick - rotationBaseTick;
+    const modulo = raw % filteredPool.length;
+    return modulo < 0 ? modulo + filteredPool.length : modulo;
+  }, [filteredPool.length, rotationBaseTick, rotationTick]);
+
+  const visibleRecommendations = useMemo<RecommendationWithDistance[]>(() => {
     if (!filteredPool.length) return [];
     const limit = Math.min(RECOMMENDATION_ROTATION_SIZE, filteredPool.length);
     return Array.from({ length: limit }, (_, idx) => {
-      const pointer = (rotationIndex + idx) % filteredPool.length;
+      const pointer = (rotationStartIndex + idx) % filteredPool.length;
       return filteredPool[pointer];
     });
-  }, [filteredPool, rotationIndex]);
-
-  useEffect(() => {
-    if (!filteredPool.length) {
-      setRotationIndex(0);
-      return;
-    }
-    setRotationIndex((prev) => prev % filteredPool.length);
-  }, [filteredPool.length]);
-
-  useEffect(() => {
-    setRotationIndex(0);
-  }, [selected]);
+  }, [filteredPool, rotationStartIndex]);
 
   useEffect(() => {
     if (!filteredPool.length) return;
     const intervalId = setInterval(() => {
-      setRotationIndex((prev) => (prev + RECOMMENDATION_ROTATION_SIZE) % filteredPool.length);
+      setRotationTick((prev) => prev + RECOMMENDATION_ROTATION_SIZE);
     }, RECOMMENDATION_ROTATION_INTERVAL);
     return () => clearInterval(intervalId);
   }, [filteredPool.length]);
@@ -463,6 +132,80 @@ export default function AlfredScreen() {
           ))}
         </ScrollView>
 
+        <View style={styles.locationBanner}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.locationTitle}>Tu ubicación</Text>
+            {locationCoords ? (
+              <Text style={styles.locationSubtitle}>
+                {locationCoords.latitude.toFixed(4)}, {locationCoords.longitude.toFixed(4)}
+              </Text>
+            ) : (
+              <Text style={styles.locationSubtitle}>
+                {hasPermission ? "Obteniendo coordenadas..." : "Activa los permisos para filtrar por cercanía"}
+              </Text>
+            )}
+            {!!error && <Text style={styles.locationError}>{error}</Text>}
+          </View>
+          <Pressable
+            style={[styles.secondaryBtn, styles.refreshBtn, isRequesting && styles.refreshBtnDisabled]}
+            onPress={refresh}
+            disabled={isRequesting}
+          >
+            <Text style={styles.secondaryText}>{isRequesting ? "Actualizando..." : "Actualizar"}</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.radiusRow}>
+          {RADIUS_OPTIONS.map((value) => (
+            <Pressable
+              key={value}
+              style={[
+                styles.radiusChip,
+                radiusKm === value && styles.radiusChipActive,
+                !locationCoords && styles.radiusChipDisabled,
+              ]}
+              onPress={() => setRadiusKm(value)}
+              disabled={!locationCoords}
+            >
+              <Text style={radiusKm === value ? styles.radiusTextActive : styles.radiusText}>{value} km</Text>
+            </Pressable>
+          ))}
+        </View>
+        <Text style={styles.radiusHint}>
+          {locationCoords
+            ? `Mostrando propuestas a ${radiusKm} km`
+            : "Activa tu ubicación para filtrar por distancia (1 km - 5 km)."}
+        </Text>
+
+        {chatSuggestions.length ? (
+          <View style={styles.aiChatCard}>
+            <Text style={styles.aiChatTitle}>AlfredIA te recomienda</Text>
+            <Text style={styles.aiChatSubtitle}>
+              {locationCoords
+                ? `Estoy encontrando ${chatSuggestions.length} opciones a menos de ${radiusKm} km de ti.`
+                : "Activa tu ubicación para personalizar aún más la conversación."}
+            </Text>
+            <View style={{ gap: 8 }}>
+              {chatSuggestions.map((rec) => (
+                <View key={`chat-${rec.id}`} style={styles.aiChatRow}>
+                  <View>
+                    <Text style={styles.aiChatRowTitle}>{rec.title}</Text>
+                    <Text style={styles.aiChatRowMeta}>
+                      {rec.category} · {formatDistance(rec.distanceKm)}
+                    </Text>
+                  </View>
+                  <Pressable style={styles.aiChatAction} onPress={() => navigation.navigate("Mapa")}>
+                    <Text style={styles.aiChatActionText}>Ver</Text>
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+            <Pressable style={styles.chatPrimaryBtn} onPress={() => navigation.navigate("Mapa")}>
+              <Text style={styles.chatPrimaryBtnText}>Abrir mapa y chat</Text>
+            </Pressable>
+          </View>
+        ) : null}
+
         <View style={{ gap: SPACING.md }}>
           {visibleRecommendations.length ? (
             visibleRecommendations.map((rec) => (
@@ -479,7 +222,7 @@ export default function AlfredScreen() {
                 <Text style={styles.cardDescription}>{rec.desc}</Text>
                 <View style={styles.cardMeta}>
                   <Text>★ {rec.rating}</Text>
-                  <Text>{rec.distance}m</Text>
+                  <Text>{formatDistance(rec.distanceKm)}</Text>
                   <Text>{rec.price}</Text>
                 </View>
                 <View style={styles.tagsRow}>
@@ -576,6 +319,125 @@ const styles = StyleSheet.create({
   categoryTextActive: {
     color: COLORS.surface,
     fontWeight: "600",
+  },
+  locationBanner: {
+    flexDirection: "row",
+    gap: SPACING.md,
+    backgroundColor: COLORS.surface,
+    borderRadius: 24,
+    padding: SPACING.md,
+    alignItems: "center",
+  },
+  aiChatCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 24,
+    padding: SPACING.lg,
+    gap: SPACING.sm,
+    shadowColor: COLORS.text,
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  aiChatTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  aiChatSubtitle: {
+    color: COLORS.muted,
+    fontSize: 12,
+  },
+  aiChatRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 4,
+  },
+  aiChatRowTitle: {
+    color: COLORS.text,
+    fontWeight: "600",
+  },
+  aiChatRowMeta: {
+    color: COLORS.muted,
+    fontSize: 12,
+  },
+  aiChatAction: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  aiChatActionText: {
+    color: COLORS.text,
+    fontWeight: "600",
+  },
+  chatPrimaryBtn: {
+    marginTop: SPACING.sm,
+    backgroundColor: COLORS.primary,
+    borderRadius: 16,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  chatPrimaryBtnText: {
+    color: COLORS.surface,
+    fontWeight: "700",
+  },
+  locationTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  locationSubtitle: {
+    color: COLORS.muted,
+    marginTop: 4,
+  },
+  locationError: {
+    color: "#dc2626",
+    marginTop: 4,
+    fontSize: 12,
+  },
+  refreshBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  refreshBtnDisabled: {
+    opacity: 0.6,
+  },
+  radiusRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: SPACING.sm,
+  },
+  radiusChip: {
+    flexGrow: 1,
+    minWidth: 70,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 18,
+    paddingVertical: 8,
+    alignItems: "center",
+    backgroundColor: COLORS.surface,
+  },
+  radiusChipActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  radiusChipDisabled: {
+    opacity: 0.5,
+  },
+  radiusText: {
+    color: COLORS.text,
+    fontWeight: "600",
+  },
+  radiusTextActive: {
+    color: COLORS.surface,
+    fontWeight: "700",
+  },
+  radiusHint: {
+    color: COLORS.muted,
+    fontSize: 12,
+    marginLeft: 4,
   },
   card: {
     backgroundColor: COLORS.surface,

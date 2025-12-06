@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ScrollView,
   View,
@@ -40,6 +40,8 @@ type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
 
 const ALARM_STORAGE_KEY = "@alfredia:alarms";
 
+type TimeParts = { hour: number; minute: number; meridian: "AM" | "PM" };
+
 export default function AlarmScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [alarms, setAlarms] = usePersistentState<AlarmType[]>(ALARM_STORAGE_KEY, initialAlarms);
@@ -53,14 +55,28 @@ export default function AlarmScreen() {
     tag: "",
     enabled: true,
   });
+  const [liveTime, setLiveTime] = useState<string>(new Date().toLocaleTimeString());
+  const [timePickerVisible, setTimePickerVisible] = useState(false);
+  const [timeDraft, setTimeDraft] = useState<TimeParts>(toParts("07:00"));
+  const hours = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
+  const minutes = useMemo(() => [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55], []);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setLiveTime(new Date().toLocaleTimeString());
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
 
   const openForm = (alarm?: AlarmType) => {
     if (alarm) {
       setEditingId(alarm.id);
       setForm({ ...alarm, time: to24h(alarm.time) });
+      setTimeDraft(toParts(to24h(alarm.time)));
     } else {
       setEditingId(null);
       setForm({ id: 0, time: "07:00", label: "", days: [], tag: "", enabled: true });
+      setTimeDraft(toParts("07:00"));
     }
     setModalVisible(true);
   };
@@ -128,11 +144,14 @@ export default function AlarmScreen() {
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>{editingId ? "Editar alarma" : "Nueva alarma"}</Text>
             <TextInput
-              style={styles.input}
-              placeholder="Hora (24h, ej: 07:00)"
-              value={form.time}
-              onChangeText={(text) => setForm((prev) => ({ ...prev, time: text }))}
+              style={[styles.input, { color: COLORS.text }]}
+              placeholder="Selecciona la hora"
+              value={toDisplay(form.time)}
+              editable={false}
             />
+            <Pressable style={styles.timeButton} onPress={() => setTimePickerVisible(true)}>
+              <Text style={styles.timeButtonText}>Elegir hora</Text>
+            </Pressable>
             <TextInput
               style={styles.input}
               placeholder="Etiqueta"
@@ -151,6 +170,11 @@ export default function AlarmScreen() {
               value={form.tag}
               onChangeText={(text) => setForm((prev) => ({ ...prev, tag: text }))}
             />
+            <View style={styles.clockBox}>
+              <Text style={styles.clockLabel}>Reloj en vivo</Text>
+              <Text style={styles.clockValue}>{liveTime}</Text>
+              <Text style={styles.clockHint}>Próxima alarma: {toDisplay(form.time || "00:00")}</Text>
+            </View>
             <View style={styles.modalActions}>
               <Pressable style={styles.secondaryBtn} onPress={() => setModalVisible(false)}>
                 <Text style={styles.secondaryText}>Cancelar</Text>
@@ -162,6 +186,68 @@ export default function AlarmScreen() {
           </View>
         </View>
       </Modal>
+
+      {timePickerVisible && (
+        <Modal transparent animationType="fade" visible={timePickerVisible}>
+          <View style={styles.timeModalBackdrop}>
+            <View style={styles.timeModalCard}>
+              <Text style={styles.timeModalTitle}>Selecciona la hora</Text>
+              <View style={styles.meridianRow}>
+                {["AM", "PM"].map((m) => (
+                  <Pressable
+                    key={m}
+                    style={[styles.meridianChip, timeDraft.meridian === m && styles.meridianChipActive]}
+                    onPress={() => setTimeDraft((prev) => ({ ...prev, meridian: m as TimeParts["meridian"] }))}
+                  >
+                    <Text style={timeDraft.meridian === m ? styles.meridianTextActive : styles.meridianText}>{m}</Text>
+                  </Pressable>
+                ))}
+              </View>
+              <Text style={styles.timeSectionLabel}>Hora</Text>
+              <View style={styles.grid}>
+                {hours.map((h) => (
+                  <Pressable
+                    key={h}
+                    style={[styles.timeChip, timeDraft.hour === h && styles.timeChipActive]}
+                    onPress={() => setTimeDraft((prev) => ({ ...prev, hour: h }))}
+                  >
+                    <Text style={timeDraft.hour === h ? styles.timeChipTextActive : styles.timeChipText}>{h}</Text>
+                  </Pressable>
+                ))}
+              </View>
+              <Text style={styles.timeSectionLabel}>Minutos</Text>
+              <View style={styles.grid}>
+                {minutes.map((m) => (
+                  <Pressable
+                    key={m}
+                    style={[styles.timeChip, timeDraft.minute === m && styles.timeChipActive]}
+                    onPress={() => setTimeDraft((prev) => ({ ...prev, minute: m }))}
+                  >
+                    <Text style={timeDraft.minute === m ? styles.timeChipTextActive : styles.timeChipText}>
+                      {String(m).padStart(2, "0")}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              <View style={styles.timeModalActions}>
+                <Pressable style={styles.secondaryBtn} onPress={() => setTimePickerVisible(false)}>
+                  <Text style={styles.secondaryText}>Cancelar</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.primaryBtn}
+                  onPress={() => {
+                    const time24 = to24FromParts(timeDraft);
+                    setForm((prev) => ({ ...prev, time: time24 }));
+                    setTimePickerVisible(false);
+                  }}
+                >
+                  <Text style={{ color: COLORS.surface, fontWeight: "600" }}>Confirmar</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -182,6 +268,20 @@ function toDisplay(time: string) {
   if (hour === 0) hour = 12;
   if (hour > 12) hour -= 12;
   return `${hour}:${m} ${suffix}`;
+}
+
+function toParts(time: string): TimeParts {
+  const [hStr, mStr] = time.split(":");
+  const h = parseInt(hStr, 10);
+  const meridian: "AM" | "PM" = h >= 12 ? "PM" : "AM";
+  const hour12 = ((h + 11) % 12) + 1; // 0->12,13->1
+  return { hour: hour12, minute: parseInt(mStr, 10) || 0, meridian };
+}
+
+function to24FromParts(parts: TimeParts) {
+  let h = parts.hour % 12;
+  if (parts.meridian === "PM") h += 12;
+  return `${String(h).padStart(2, "0")}:${String(parts.minute).padStart(2, "0")}`;
 }
 
 const styles = StyleSheet.create({
@@ -303,10 +403,119 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     gap: SPACING.sm,
   },
+  timeButton: {
+    marginTop: SPACING.xs,
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: COLORS.primary,
+    alignItems: "center",
+  },
+  timeButtonText: {
+    color: COLORS.surface,
+    fontWeight: "700",
+  },
+  clockBox: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 12,
+    padding: SPACING.md,
+    backgroundColor: COLORS.surface,
+    gap: 4,
+  },
+  clockLabel: {
+    color: COLORS.muted,
+    fontSize: 12,
+  },
+  clockValue: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  clockHint: {
+    color: COLORS.muted,
+    fontSize: 12,
+  },
   primaryBtn: {
     backgroundColor: COLORS.primary,
     borderRadius: 12,
     paddingHorizontal: 20,
     paddingVertical: 12,
+  },
+  timeModalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: SPACING.lg,
+  },
+  timeModalCard: {
+    width: "100%",
+    backgroundColor: COLORS.surface,
+    borderRadius: 24,
+    padding: SPACING.lg,
+    gap: SPACING.sm,
+  },
+  timeModalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  meridianRow: {
+    flexDirection: "row",
+    gap: SPACING.sm,
+  },
+  meridianChip: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: "center",
+  },
+  meridianChipActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  meridianText: {
+    color: COLORS.text,
+    fontWeight: "600",
+  },
+  meridianTextActive: {
+    color: COLORS.surface,
+    fontWeight: "700",
+  },
+  timeSectionLabel: {
+    color: COLORS.muted,
+    fontSize: 12,
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: SPACING.sm,
+  },
+  timeChip: {
+    width: 60,
+    paddingVertical: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: "center",
+  },
+  timeChipActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  timeChipText: {
+    color: COLORS.text,
+    fontWeight: "600",
+  },
+  timeChipTextActive: {
+    color: COLORS.surface,
+    fontWeight: "700",
+  },
+  timeModalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: SPACING.sm,
   },
 });
